@@ -26,5 +26,37 @@ exports.login = async (req, res) => {
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-  res.json({ token });
+  res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+};
+
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching user profile" });
+  }
+};
+
+exports.updateMe = async (req, res) => {
+  const { name, email } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (name) user.name = name;
+    if (email) {
+      if (email !== user.email) {
+        const emailExists = await User.findOne({ email });
+        if (emailExists) return res.status(400).json({ message: "Email already in use" });
+      }
+      user.email = email;
+    }
+
+    await user.save();
+    res.json({ id: user._id, name: user.name, email: user.email, createdAt: user.createdAt });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating profile" });
+  }
 };
