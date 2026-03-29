@@ -1,0 +1,9 @@
+
+> vite-react-typescript-starter@0.0.0 typecheck
+> tsc --noEmit -p tsconfig.app.json
+
+src/screens/CreateCapsule/CreateCapsule.tsx(6,1): error TS6133: 'createCapsule' is declared but its value is never read.
+src/screens/Dashboard/Dashboard.tsx(4,3): error TS6133: 'Search' is declared but its value is never read.
+src/screens/Dashboard/Dashboard.tsx(8,3): error TS6133: 'ShieldCheck' is declared but its value is never read.
+src/screens/Dashboard/Dashboard.tsx(22,10): error TS6133: 'viewMode' is declared but its value is never read.
+src/screens/Frame/Frame.tsx(38,24): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type 'AuthData'.
