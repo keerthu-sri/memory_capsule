@@ -89,6 +89,12 @@ const sendInviteEmail = async ({ to, capsuleTitle, role, ownerName, capsuleId })
   });
 };
 
+const fileToDataUri = (file) => {
+  if (!file?.buffer) return "";
+  const mimeType = file.mimetype || "application/octet-stream";
+  return `data:${mimeType};base64,${file.buffer.toString("base64")}`;
+};
+
 const buildCapsuleMemories = (files, textMemories = []) => {
   const memories = [];
   const images = [];
@@ -96,11 +102,12 @@ const buildCapsuleMemories = (files, textMemories = []) => {
   (files || [])
     .filter((file) => file.fieldname === "image")
     .forEach((file) => {
-      images.push(file.path);
+      const encodedImage = fileToDataUri(file);
+      images.push(encodedImage);
       memories.push({
         type: "photo",
         content: file.originalname,
-        preview: file.path,
+        preview: encodedImage,
       });
     });
 
@@ -117,10 +124,11 @@ const buildCapsuleMemories = (files, textMemories = []) => {
   (files || [])
     .filter((file) => file.fieldname === "audio" || file.fieldname === "song")
     .forEach((file) => {
+      const encodedAudio = fileToDataUri(file);
       memories.push({
         type: "audio",
         content: file.originalname,
-        preview: file.path,
+        preview: encodedAudio,
         mediaKind: file.fieldname === "song" ? "song" : "voice",
       });
     });

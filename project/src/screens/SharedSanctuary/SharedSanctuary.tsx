@@ -25,7 +25,7 @@ const getOwnerName = (capsule: Capsule) =>
 
 const buildAssetUrl = (value?: string) => {
   if (!value) return "";
-  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
   return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
 };
 
