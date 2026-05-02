@@ -89,26 +89,26 @@ export const Dashboard = () => {
       <div
         key={capsule._id}
         onClick={() => navigate(`/capsule/${capsule._id}`)}
-        className="group relative bg-[#ffffff08] rounded-2xl border border-[#7919e633] overflow-hidden cursor-pointer hover:border-[#7919e6] transition-all hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(121,25,230,0.3)] h-[250px] flex flex-col"
+        className="group relative bg-[#ffffff08] rounded-2xl border border-[#7919e633] overflow-hidden cursor-pointer hover:border-[#7919e6] transition-all hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(121,25,230,0.3)] min-h-[220px] flex flex-col"
       >
         {hasImage && (
-          <div className="relative h-28 w-full shrink-0 overflow-hidden border-b border-[#7919e633] bg-[#0a0a1a]">
+          <div className="w-full h-32 overflow-hidden border-b border-[#7919e633] bg-[#0a0a1a]">
             <img
               src={previewImage}
               alt={capsule.title}
-              className="absolute inset-0 h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-500"
             />
           </div>
         )}
         {!hasImage && (
-          <div className="h-28 w-full shrink-0 bg-[#0f172a] flex flex-col items-center justify-center border-b border-[#7919e633]">
+          <div className="w-full h-32 bg-[#0f172a] flex flex-col items-center justify-center border-b border-[#7919e633]">
             <Lock className="w-8 h-8 text-[#7919e6] mb-2" />
             <span className="text-xs text-[#7919e6] uppercase tracking-widest font-bold">
               {isUnlocked ? "Memory Capsule" : "Encrypted Node"}
             </span>
           </div>
         )}
-        <div className="p-5 flex-1 min-h-0 flex flex-col">
+        <div className="p-5 flex-1 flex flex-col">
           <h3 className="text-white font-semibold text-lg mb-1">{capsule.title}</h3>
           <p className="text-slate-500 text-xs mb-3 font-medium tracking-wide">
             {isUnlocked ? "UNLOCKED" : "UNLOCKS"} • {new Date(capsule.unlockDate).toLocaleDateString()}

@@ -1,4 +1,4 @@
-import { ArrowRight as ArrowRightIcon, Lock as LockIcon, Mail as MailIcon, ShieldCheck as ShieldCheckIcon, User } from "lucide-react";
+import { ArrowLeft as ArrowLeftIcon, ArrowRight as ArrowRightIcon, Lock as LockIcon, Mail as MailIcon, ShieldCheck as ShieldCheckIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
@@ -108,6 +108,14 @@ export const Frame = (): JSX.Element => {
         <div className="relative z-10 flex w-full max-w-[460px] flex-col items-center gap-7">
           {/* Header */}
           <div className="flex w-full flex-col items-center text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#33415580] bg-[#ffffff08] px-4 py-2 text-sm text-slate-300 transition-colors hover:border-[#7919e6] hover:text-white"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Back to home
+            </button>
             <div className="pb-3">
               <h1 className="[font-family:'Dancing_Script',Helvetica] text-5xl font-normal leading-none text-[#8d37ff] sm:text-[3.8rem]">
                 {mode === "login" ? "Secure Entry" : "Create Vault"}
