@@ -28,6 +28,7 @@ export const CalendarView = () => {
     if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
     return `${import.meta.env.VITE_API_URL}/${value.replace(/\\/g, "/")}`;
   };
+  
   const getCapsulePreviewImage = (capsule?: Capsule) => {
     if (!capsule) return undefined;
     if (capsule.images?.[0]) return buildAssetUrl(capsule.images[0]);
