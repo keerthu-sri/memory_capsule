@@ -66,15 +66,15 @@ const VaultCard = ({
   return (
     <div
       onClick={onOpen}
-      className="theme-surface group rounded-2xl overflow-hidden border backdrop-blur-md hover:border-[var(--app-accent)] transition-all cursor-pointer"
+      className="theme-surface group rounded-2xl overflow-hidden border backdrop-blur-md hover:border-[var(--app-accent)] transition-all cursor-pointer h-full"
     >
-      <div className="relative h-56 overflow-hidden bg-[#120f22]">
+      <div className="relative h-40 overflow-hidden bg-[#120f22]">
         {previewImage ? (
-          <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_55%)] p-4">
+          <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_55%)] p-2">
             <img
               src={previewImage}
               alt={capsule.title}
-              className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
             />
           </div>
         ) : (
@@ -88,9 +88,9 @@ const VaultCard = ({
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-5">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h3 className="font-semibold text-xl">{capsule.title}</h3>
+          <h3 className="font-semibold text-lg">{capsule.title}</h3>
           {!isUnlocked && (
             <span className="text-[10px] uppercase tracking-widest text-[#d7b8ff] border border-[#7919e6]/40 rounded-full px-2 py-1">
               Locked
@@ -98,9 +98,9 @@ const VaultCard = ({
           )}
         </div>
 
-        <p className="theme-muted text-sm mb-4 line-clamp-2">{capsule.message || "Shared memory capsule"}</p>
+        <p className="theme-muted text-sm mb-3 line-clamp-2">{capsule.message || "Shared memory capsule"}</p>
 
-        <div className="space-y-2 text-sm theme-muted">
+        <div className="space-y-1.5 text-sm theme-muted">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
             <span>Last activity {getLastActivity(capsule.createdAt)}</span>
@@ -318,7 +318,7 @@ export const SharedSanctuary = () => {
               No collaborative capsules created by you yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {sharedByMe.map((vault) => (
                 <VaultCard
                   key={vault._id}
@@ -346,7 +346,7 @@ export const SharedSanctuary = () => {
               No accepted shared capsules yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {sharedWithMe.map((vault) => (
                 <VaultCard key={vault._id} capsule={vault} onOpen={() => navigate(`/capsule/${vault._id}`)} />
               ))}

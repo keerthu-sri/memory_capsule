@@ -350,8 +350,8 @@ export const CapsuleView = () => {
         <div className="max-w-7xl mx-auto grid xl:grid-cols-[minmax(0,1fr)_300px] gap-8 items-start">
           <div className="min-w-0">
             {canEdit && (
-              <div className="mb-10 theme-surface border rounded-3xl p-6 backdrop-blur-md">
-                <div className="flex items-center justify-between gap-4 mb-5">
+              <div className="mb-10 theme-surface border rounded-3xl p-5 md:p-6 backdrop-blur-md">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-5">
                   <div>
                     <div className="text-xs text-[var(--app-accent)] uppercase tracking-[0.3em] mb-2">Collaborative Editing</div>
                     <h2 className="text-2xl font-bold">Add your contribution</h2>
@@ -363,21 +363,21 @@ export const CapsuleView = () => {
                   )}
                 </div>
 
-                <div className="grid lg:grid-cols-[minmax(0,2fr)_280px] gap-5">
+                <div className="grid lg:grid-cols-[minmax(0,1fr)_260px] gap-5 items-start">
                   <textarea
                     value={newNote}
                     onChange={(event) => setNewNote(event.target.value)}
                     rows={5}
                     placeholder="Add a note to this shared capsule..."
-                    className="theme-input w-full rounded-2xl px-4 py-3 placeholder-[var(--app-subtle)] focus:outline-none focus:border-[var(--app-accent)] resize-none"
+                    className="theme-input min-h-[220px] w-full rounded-2xl px-4 py-3 placeholder-[var(--app-subtle)] focus:outline-none focus:border-[var(--app-accent)] resize-none"
                   />
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
                     <input ref={uploadInputRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
                     <input ref={songInputRef} type="file" accept="audio/*" onChange={handleSongSelect} className="hidden" />
                     <button
                       type="button"
                       onClick={() => uploadInputRef.current?.click()}
-                      className="theme-input w-full rounded-2xl px-4 py-3 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
+                      className="theme-input w-full rounded-2xl px-4 py-2.5 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
                     >
                       <Upload className="w-4 h-4" />
                       {pendingPhoto ? "Photo ready" : "Add photo"}
@@ -385,7 +385,7 @@ export const CapsuleView = () => {
                     <button
                       type="button"
                       onClick={handleRecordVoice}
-                      className="theme-input w-full rounded-2xl px-4 py-3 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
+                      className="theme-input w-full rounded-2xl px-4 py-2.5 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
                     >
                       <Mic className="w-4 h-4" />
                       {isRecording ? "Stop recording" : pendingAudio && pendingAudioKind === "voice" ? "Voice ready" : "Add voice"}
@@ -393,7 +393,7 @@ export const CapsuleView = () => {
                     <button
                       type="button"
                       onClick={() => songInputRef.current?.click()}
-                      className="theme-input w-full rounded-2xl px-4 py-3 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
+                      className="theme-input w-full rounded-2xl px-4 py-2.5 flex items-center justify-center gap-2 hover:border-[var(--app-accent)]"
                     >
                       <Music className="w-4 h-4" />
                       {pendingAudio && pendingAudioKind === "song" ? "Song ready" : "Add song"}
@@ -401,7 +401,7 @@ export const CapsuleView = () => {
                     <select
                       value={selectedMicId}
                       onChange={(event) => setSelectedMicId(event.target.value)}
-                      className="theme-input w-full rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--app-accent)]"
+                      className="theme-input w-full rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--app-accent)]"
                     >
                       {audioInputs.length === 0 && <option value="">Default microphone</option>}
                       {audioInputs.map((device, index) => (
@@ -414,7 +414,7 @@ export const CapsuleView = () => {
                       type="button"
                       onClick={handleSaveContribution}
                       disabled={isSaving}
-                      className="w-full rounded-2xl bg-[var(--app-accent)] hover:bg-[#6a15cc] px-4 py-3 flex items-center justify-center gap-2 text-white"
+                      className="w-full rounded-2xl bg-[var(--app-accent)] hover:bg-[#6a15cc] px-4 py-2.5 flex items-center justify-center gap-2 text-white"
                     >
                       <Send className="w-4 h-4" />
                       {isSaving ? "Saving..." : "Save changes"}
@@ -439,7 +439,7 @@ export const CapsuleView = () => {
                       {pendingPhoto && (
                         <div className="rounded-xl border border-[var(--app-border-soft)] p-3">
                           <div className="mb-2 text-sm font-medium">Pending image</div>
-                          <img src={pendingPhotoPreview} alt="Pending upload preview" className="h-40 w-full rounded-xl object-cover" />
+                          <img src={pendingPhotoPreview} alt="Pending upload preview" className="h-32 w-full rounded-xl object-cover" />
                         </div>
                       )}
                       {pendingAudio && (
@@ -470,13 +470,13 @@ export const CapsuleView = () => {
               <>
                 <div className="mb-12 flex justify-center">
                   {photoItems.length > 0 ? (
-                    <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid w-full max-w-5xl grid-cols-1 justify-items-center gap-5 md:grid-cols-2 xl:grid-cols-3">
                       {photoItems.map((item: CapsuleMemoryItem, index) => {
                         const src = buildAssetUrl(item.preview);
                         return (
                           <div
                             key={`${src}-${index}`}
-                            className="w-full max-w-sm min-h-[300px] rounded-2xl overflow-hidden border border-[var(--app-border)] bg-[var(--app-surface)] shadow-2xl relative group"
+                            className="relative h-56 w-full max-w-xs overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] shadow-xl group"
                           >
                             {src ? (
                               <img src={src} alt={item.content || "Capsule memory"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />

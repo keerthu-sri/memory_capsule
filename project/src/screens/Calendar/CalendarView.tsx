@@ -180,14 +180,6 @@ export const CalendarView = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/20">
-                  <img src={`https://i.pravatar.cc/150?img=${i + 10}`} alt="User" className="w-full h-full object-cover" />
-                </div>
-              ))}
-              <div className="text-white font-bold text-sm">+3</div>
-            </div>
             <Button onClick={() => navigate("/createcapsule")}
             className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600">
               + New Capsule
@@ -241,10 +233,7 @@ export const CalendarView = () => {
               <div className="text-xs text-white/90 uppercase tracking-wider font-medium">GOLDEN HOUR</div>
             </div>
             <div className="text-4xl font-bold text-white mb-1">{filteredMemories.length}</div>
-            <div className="flex items-center gap-2 mt-4">
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30">
-                <img src="https://i.pravatar.cc/150?img=20" alt="User" className="w-full h-full object-cover" />
-              </div>
+            <div className="mt-4">
               <div>
                 <div className="text-white text-sm font-medium">Total Memories</div>
                 <div className="text-white/70 text-xs">Captured so far</div>
@@ -286,13 +275,8 @@ export const CalendarView = () => {
                 </button>
               </div>
 
-              <div className="flex items-center gap-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full overflow-hidden border-2 border-amber-500/30">
-                    <img src={`https://i.pravatar.cc/150?img=${i + 15}`} alt="User" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                <div className="text-amber-200 font-bold text-sm">+3</div>
+              <div className="text-xs uppercase tracking-[0.25em] text-amber-200/60">
+                {filteredCapsules.length} capsules
               </div>
             </div>
 
