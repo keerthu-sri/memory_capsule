@@ -1,10 +1,9 @@
 ﻿import { Grid3x3, List, Lock, Plus, Share2, Unlock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "../../components/layout/Layout";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { cn } from "../../lib/utils";
-import { getMemories } from "../../services/memory";
 import { getCapsules, type Capsule } from "../../services/capsule";
 
 const getOwnerId = (value?: string | { _id?: string; id?: string }) => {
@@ -12,19 +11,30 @@ const getOwnerId = (value?: string | { _id?: string; id?: string }) => {
   return typeof value === "string" ? value : value._id || value.id || "";
 };
 
+const buildAssetUrl = (value?: string) => {
+  if (!value) return "";
+  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
+  return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
+};
+
+const getCapsulePreviewImage = (capsule: Capsule) => {
+  if (capsule.images?.[0]) return buildAssetUrl(capsule.images[0]);
+  const firstPhoto = capsule.memories?.find((memory) => memory.type === "photo" && memory.preview);
+  return buildAssetUrl(firstPhoto?.preview);
+};
+
 export const Dashboard = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [moodFilter, setMoodFilter] = useState<string | null>(null);
-  const [memories, setMemories] = useState<any[]>([]);
   const [capsules, setCapsules] = useState<Capsule[]>([]);
+  const [searchParams] = useSearchParams();
   const userId = localStorage.getItem("userId") || "";
+  const query = (searchParams.get("q") || "").trim().toLowerCase();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [memoryResponse, capsuleResponse] = await Promise.all([getMemories(), getCapsules()]);
-        setMemories(memoryResponse.data ?? []);
+        const capsuleResponse = await getCapsules();
         setCapsules(capsuleResponse.data ?? []);
       } catch (error) {
         console.error(error);
@@ -34,20 +44,15 @@ export const Dashboard = () => {
     void fetchData();
   }, []);
 
-  const moods = ["Happy", "Nostalgic", "Adventurous", "Calm"];
-
-  const filteredMemories = useMemo(() => {
-    if (!moodFilter) return memories;
-    return memories.filter(
-      (memory) =>
-        memory.mood?.toLowerCase() === moodFilter.toLowerCase() ||
-        memory.text?.toLowerCase().includes(moodFilter.toLowerCase())
-    );
-  }, [memories, moodFilter]);
+  const matchesCapsuleQuery = (capsule: Capsule) =>
+    !query ||
+    capsule.title?.toLowerCase().includes(query) ||
+    capsule.message?.toLowerCase().includes(query) ||
+    capsule.mood?.toLowerCase().includes(query);
 
   const personalCapsules = useMemo(
-    () => capsules.filter((capsule) => capsule.isPrivate && getOwnerId(capsule.userId) === userId),
-    [capsules, userId]
+    () => capsules.filter((capsule) => capsule.isPrivate && getOwnerId(capsule.userId) === userId && matchesCapsuleQuery(capsule)),
+    [capsules, userId, query]
   );
 
   const allSharedCapsules = useMemo(
@@ -56,9 +61,10 @@ export const Dashboard = () => {
         (capsule) =>
           !capsule.isPrivate &&
           capsule.isCollaborative &&
-          Boolean(capsule.currentUserRole)
+          Boolean(capsule.currentUserRole) &&
+          matchesCapsuleQuery(capsule)
       ),
-    [capsules]
+    [capsules, query]
   );
 
   const recentSharedCapsules = useMemo(
@@ -70,13 +76,14 @@ export const Dashboard = () => {
   );
 
   const upcomingUnlocks = useMemo(
-    () => capsules.filter((capsule) => new Date(capsule.unlockDate) > new Date() && !capsule.isUnlocked),
-    [capsules]
+    () => capsules.filter((capsule) => new Date(capsule.unlockDate) > new Date() && !capsule.isUnlocked && matchesCapsuleQuery(capsule)),
+    [capsules, query]
   );
 
   const renderCard = (capsule: Capsule) => {
     const isUnlocked = capsule.isReadyToView || capsule.canViewContent || false;
-    const hasImage = Boolean(capsule.images && capsule.images.length > 0 && isUnlocked);
+    const previewImage = isUnlocked ? getCapsulePreviewImage(capsule) : "";
+    const hasImage = Boolean(previewImage);
 
     return (
       <div
@@ -87,7 +94,7 @@ export const Dashboard = () => {
         {hasImage && (
           <div className="w-full h-32 overflow-hidden border-b border-[#7919e633]">
             <img
-              src={`http://localhost:5000/${capsule.images?.[0].replace(/\\/g, "/")}`}
+              src={previewImage}
               alt={capsule.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
@@ -131,7 +138,7 @@ export const Dashboard = () => {
     <Layout>
       <PageHeader
         title="Personal Gallery"
-        subtitle={`${memories.length} Memories • ${capsules.length} Capsules`}
+        subtitle={`${capsules.length} Capsules`}
         searchPlaceholder="Search timeline..."
       />
 
@@ -178,23 +185,8 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-8 py-4">
-        {moods.map((mood) => (
-          <button
-            key={mood}
-            onClick={() => setMoodFilter(moodFilter === mood ? null : mood)}
-            className={cn(
-              "px-6 py-2 rounded-full text-sm transition-all font-medium",
-              moodFilter === mood
-                ? "bg-[#7919e6] text-white shadow-[0_0_15px_rgba(121,25,230,0.5)] border border-[#7919e6]"
-                : "bg-[#ffffff08] text-slate-400 hover:text-white hover:bg-[#ffffff12] border border-[#ffffff10]"
-            )}
-          >
-            {mood}
-          </button>
-        ))}
-
-        <div className="ml-auto flex gap-2 bg-[#ffffff05] p-1 rounded-xl border border-[#ffffff10]">
+      <div className="flex justify-end mb-8 py-4">
+        <div className="flex gap-2 bg-[#ffffff05] p-1 rounded-xl border border-[#ffffff10]">
           <button
             onClick={() => setViewMode("grid")}
             className={cn("p-2 rounded-lg transition-colors", viewMode === "grid" ? "bg-[#7919e6] text-white" : "text-slate-400")}
@@ -246,38 +238,6 @@ export const Dashboard = () => {
             </div>
           </section>
         )}
-
-        <section>
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="w-2 h-8 bg-blue-500 rounded-full inline-block shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
-            Memory Stream Snapshots
-          </h2>
-          {filteredMemories.length === 0 ? (
-            <div className="text-slate-500 italic p-8 bg-[#ffffff03] rounded-2xl border border-dashed border-[#ffffff10] text-center">
-              No standalone memories found for this filter.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredMemories.map((memory: any) => (
-                <div
-                  key={memory._id}
-                  className="bg-[#ffffff08] p-6 rounded-2xl border border-[#ffffff10] hover:border-blue-500/50 transition-colors group relative cursor-pointer"
-                  onClick={() => navigate("/timeline")}
-                >
-                  {memory.mood && (
-                    <span className="absolute top-4 right-4 text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                      {memory.mood}
-                    </span>
-                  )}
-                  <p className="text-slate-200 leading-relaxed font-medium mb-4 pr-12">{memory.text}</p>
-                  <span className="text-xs text-slate-500 tracking-wider uppercase font-semibold">
-                    {new Date(memory.createdAt || memory.date).toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </div>
     </Layout>
   );

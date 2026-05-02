@@ -468,27 +468,29 @@ export const CapsuleView = () => {
               </div>
             ) : (
               <>
-                <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x mb-12" style={{ scrollbarWidth: "none" }}>
+                <div className="mb-12 flex justify-center">
                   {photoItems.length > 0 ? (
-                    photoItems.map((item: CapsuleMemoryItem, index) => {
-                      const src = buildAssetUrl(item.preview);
-                      return (
-                        <div
-                          key={`${src}-${index}`}
-                          className="flex-none w-80 min-h-[300px] rounded-2xl overflow-hidden border border-[var(--app-border)] bg-[var(--app-surface)] snap-center shadow-2xl relative group"
-                        >
-                          {src ? (
-                            <img src={src} alt={item.content || "Capsule memory"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center theme-muted">
-                              <ImageIcon className="w-8 h-8" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
+                    <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-6 md:grid-cols-2 xl:grid-cols-3">
+                      {photoItems.map((item: CapsuleMemoryItem, index) => {
+                        const src = buildAssetUrl(item.preview);
+                        return (
+                          <div
+                            key={`${src}-${index}`}
+                            className="w-full max-w-sm min-h-[300px] rounded-2xl overflow-hidden border border-[var(--app-border)] bg-[var(--app-surface)] shadow-2xl relative group"
+                          >
+                            {src ? (
+                              <img src={src} alt={item.content || "Capsule memory"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center theme-muted">
+                                <ImageIcon className="w-8 h-8" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
-                    <div className="w-full rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-12 text-center theme-muted">
+                    <div className="w-full max-w-3xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-12 text-center theme-muted">
                       No photos added in this capsule.
                     </div>
                   )}
@@ -513,37 +515,37 @@ export const CapsuleView = () => {
                 )}
 
                 {audioItems.length > 0 && (
-                  <div className="mb-10 space-y-3">
+                  <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                     {audioItems.map((item, index) => {
                       const src = buildAssetUrl(item.preview);
                       const isSong = item.mediaKind === "song";
                       return (
                         <div
                           key={`${src}-${index}`}
-                          className="theme-surface border rounded-xl p-6 flex flex-col gap-4 shadow-md"
+                          className="theme-surface border rounded-2xl p-6 flex h-full flex-col gap-4 shadow-md"
                         >
-                          <div className="flex items-center justify-between gap-4 flex-wrap">
-                            <div className="flex items-center gap-4 min-w-0">
-                              <div className="w-12 h-12 rounded-full bg-[var(--app-accent)]/20 flex items-center justify-center shrink-0">
-                                {isSong ? <Music className="w-5 h-5 text-[var(--app-accent)]" /> : <Mic className="w-5 h-5 text-[var(--app-accent)]" />}
-                              </div>
-                              <div className="min-w-0">
-                                <span className="font-medium block">{isSong ? `Song ${index + 1}` : `Recorded Audio Memory ${index + 1}`}</span>
-                                <span className="text-sm theme-muted break-all">{item.content}</span>
-                              </div>
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-full bg-[var(--app-accent)]/20 flex items-center justify-center shrink-0">
+                              {isSong ? <Music className="w-5 h-5 text-[var(--app-accent)]" /> : <Mic className="w-5 h-5 text-[var(--app-accent)]" />}
                             </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="font-medium block">{isSong ? `Song ${index + 1}` : `Recorded Audio Memory ${index + 1}`}</span>
+                              <span className="text-sm theme-muted break-all">{item.content}</span>
+                            </div>
+                          </div>
+                          <div className="mt-auto space-y-4">
                             <button
                               type="button"
                               onClick={() => src && toggleAudio(src)}
-                              className="flex items-center gap-2 px-6 py-2 rounded-full border border-[var(--app-border)] hover:bg-[var(--app-accent)] hover:text-white transition-all text-sm font-semibold tracking-wider uppercase text-[var(--app-accent)]"
+                              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--app-border)] px-4 py-3 text-sm font-semibold tracking-wider uppercase text-[var(--app-accent)] transition-all hover:bg-[var(--app-accent)] hover:text-white"
                             >
                               {activeAudio === src && isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                               {activeAudio === src && isPlaying ? "Pause" : "Play"}
                             </button>
+                            <audio controls preload="metadata" className="w-full">
+                              <source src={src} />
+                            </audio>
                           </div>
-                          <audio controls preload="metadata" className="w-full">
-                            <source src={src} />
-                          </audio>
                         </div>
                       );
                     })}

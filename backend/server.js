@@ -28,6 +28,8 @@ require("./cron");
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/capsules", require("./routes/capsuleRoutes"));
 app.use("/api/memories", require("./routes/memoryRoutes"));
+app.use("/api/members", require("./routes/memberRoutes"));
+app.use("/members", require("./routes/memberRoutes"));
 app.use("/uploads", express.static("uploads"));
 
 // ✅ MongoDB

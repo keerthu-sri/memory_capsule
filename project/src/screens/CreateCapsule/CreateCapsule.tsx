@@ -304,9 +304,7 @@ export const CreateCapsule = () => {
             </div>
             <div className="flex items-center gap-4 shrink-0">
               <ThemeToggle />
-              <div className="theme-muted text-sm whitespace-nowrap">
-                STEP <span className="text-[var(--app-accent)] font-bold">1</span> OF 3
-              </div>
+              
             </div>
           </div>
         </div>

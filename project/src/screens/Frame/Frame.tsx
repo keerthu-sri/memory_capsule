@@ -1,10 +1,27 @@
-import { Apple as AppleIcon, ArrowRight as ArrowRightIcon, Lock as LockIcon, Mail as MailIcon, ShieldCheck as ShieldCheckIcon, User } from "lucide-react";
+import { ArrowRight as ArrowRightIcon, Lock as LockIcon, Mail as MailIcon, ShieldCheck as ShieldCheckIcon, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Label } from "../../components/ui/label";
 import { login, register } from "../../services/auth";
+
+const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const isValidEmailDomain = (domain: string) => {
+  if (!domain || domain.length > 253 || domain.includes("..")) return false;
+  const labels = domain.split(".");
+  if (labels.length < 2) return false;
+  const tld = labels[labels.length - 1];
+  if (!/^[A-Za-z]{2,}$/.test(tld)) return false;
+
+  return labels.every((label) =>
+    Boolean(label) &&
+    label.length <= 63 &&
+    /^[A-Za-z0-9-]+$/.test(label) &&
+    !label.startsWith("-") &&
+    !label.endsWith("-")
+  );
+};
 
 export const Frame = (): JSX.Element => {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -21,10 +38,31 @@ export const Frame = (): JSX.Element => {
     else localStorage.removeItem("remember");
   };
 
+  const validateEmail = () => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setError("Email is required.");
+      return null;
+    }
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      setError("Please enter a valid email address.");
+      return null;
+    }
+    const [, domain = ""] = normalizedEmail.split("@");
+    if (!isValidEmailDomain(domain)) {
+      setError("Please enter an email with a valid domain.");
+      return null;
+    }
+    return normalizedEmail;
+  };
+
   const handleLogin = async () => {
+    const normalizedEmail = validateEmail();
+    if (!normalizedEmail) return;
+
     try {
       setError(null);
-      const res = await login({ email, password });
+      const res = await login({ email: normalizedEmail, password });
       setToken(res.data.token);
       navigate("/dashboard");
     } catch (err: any) {
@@ -33,10 +71,13 @@ export const Frame = (): JSX.Element => {
   };
 
   const handleRegister = async () => {
+    const normalizedEmail = validateEmail();
+    if (!normalizedEmail) return;
+
     try {
       setError(null);
-      await register({ name, email, password });
-      const loginRes = await login({ email, password });
+      await register({ name, email: normalizedEmail, password });
+      const loginRes = await login({ email: normalizedEmail, password });
       setToken(loginRes.data.token);
       navigate("/dashboard");
     } catch (err: any) {
@@ -45,8 +86,8 @@ export const Frame = (): JSX.Element => {
   };
 
   return (
-    <div className="w-full min-w-[1280px] min-h-[931px] flex">
-      <div className="flex h-[931px] flex-1 relative w-[1280px] items-center justify-center px-0 py-[75px] bg-[#0a0a1a]">
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0a1a]">
+      <div className="relative flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
         {/* Background gradients */}
         <div className="absolute w-full h-full top-0 left-0 [background:radial-gradient(50%_50%_at_100%_0%,rgba(26,11,46,1)_0%,rgba(10,10,26,1)_100%)]">
           <div className="absolute -top-20 -left-20 w-64 h-64 bg-[#7919e6] rounded-[128px] blur-sm opacity-15" />
@@ -64,31 +105,31 @@ export const Frame = (): JSX.Element => {
         </div>
 
         {/* Main content */}
-        <div className="flex flex-col max-w-md w-[448px] items-start gap-8 px-6 py-0 relative">
+        <div className="relative z-10 flex w-full max-w-[460px] flex-col items-center gap-7">
           {/* Header */}
-          <div className="flex flex-col items-center relative self-stretch w-full">
-            <div className="inline-flex flex-col items-start pt-0 pb-2 px-0 relative">
-              <h1 className="relative flex items-center w-[216.78px] h-12 mt-[-1.00px] [font-family:'Dancing_Script',Helvetica] font-normal text-[#7919e6] text-5xl tracking-[0] leading-[48px] whitespace-nowrap">
+          <div className="flex w-full flex-col items-center text-center">
+            <div className="pb-3">
+              <h1 className="[font-family:'Dancing_Script',Helvetica] text-5xl font-normal leading-none text-[#8d37ff] sm:text-[3.8rem]">
                 {mode === "login" ? "Secure Entry" : "Create Vault"}
               </h1>
             </div>
-            <div className="inline-flex flex-col items-start relative">
-              <p className="flex items-center w-[187.63px] h-5 [font-family:'Plus_Jakarta_Sans',Helvetica] font-light text-slate-400 text-sm tracking-[0.35px] leading-5 whitespace-nowrap relative mt-[-1.00px]">
+            <div>
+              <p className="[font-family:'Plus_Jakarta_Sans',Helvetica] text-sm font-light tracking-[0.35px] text-slate-400 sm:text-base">
                 {mode === "login" ? "Enter your digital sanctuary" : "Join the memory capsule community"}
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              <button type="button" className={mode === "login" ? "px-3 py-1 rounded-lg bg-[#7919e6] text-white" : "px-3 py-1 rounded-lg bg-[#334155] text-slate-300"} onClick={() => setMode("login")}>Login</button>
-              <button type="button" className={mode === "register" ? "px-3 py-1 rounded-lg bg-[#7919e6] text-white" : "px-3 py-1 rounded-lg bg-[#334155] text-slate-300"} onClick={() => setMode("register")}>Register</button>
+            <div className="mt-5 inline-flex rounded-full border border-[#33415580] bg-[#ffffff08] p-1">
+              <button type="button" className={mode === "login" ? "rounded-full bg-[#7919e6] px-4 py-2 text-sm text-white" : "rounded-full px-4 py-2 text-sm text-slate-300"} onClick={() => setMode("login")}>Login</button>
+              <button type="button" className={mode === "register" ? "rounded-full bg-[#7919e6] px-4 py-2 text-sm text-white" : "rounded-full px-4 py-2 text-sm text-slate-300"} onClick={() => setMode("register")}>Register</button>
             </div>
           </div>
 
           {/* Card */}
-          <div className="flex flex-col items-start pt-8 pb-12 px-8 relative self-stretch w-full bg-[#ffffff08] rounded-3xl overflow-hidden border border-solid border-[#7919e633] shadow-[0px_25px_50px_-12px_#00000040] backdrop-blur-md backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(12px)_brightness(100%)]">
+          <div className="relative flex w-full flex-col overflow-hidden rounded-[30px] border border-solid border-[#7919e633] bg-[#ffffff08] px-6 pb-10 pt-8 shadow-[0px_25px_50px_-12px_#00000040] backdrop-blur-md backdrop-brightness-[100%] sm:px-8 [-webkit-backdrop-filter:blur(12px)_brightness(100%)]">
             {/* Card glow */}
             <div className="absolute top-[-39px] right-[-39px] w-32 h-32 bg-[#7919e61a] rounded-full blur-[32px]" />
 
-            <div className="flex flex-col w-[334px] items-start gap-6 relative">
+            <div className="relative flex w-full flex-col gap-6">
               {mode === "register" && (
                 <div className="flex flex-col items-end gap-2 relative self-stretch w-full">
                   <div className="flex flex-col w-full items-start relative">
@@ -199,46 +240,11 @@ export const Frame = (): JSX.Element => {
                 </div>
               )}
 
-              {/* Divider */}
-              <div className="flex flex-col items-start px-0 py-4 relative self-stretch w-full">
-                <div className="flex w-full h-full items-center justify-center absolute top-0 left-0">
-                  <div className="relative flex-1 grow h-px border-t border-solid border-[#3341554c]" />
-                </div>
-                <div className="flex items-start justify-center relative self-stretch w-full">
-                  <div className="inline-flex flex-col items-start px-2 py-0 relative self-stretch bg-transparent z-10">
-                    <span className="flex items-center h-4 [font-family:'Plus_Jakarta_Sans',Helvetica] font-normal text-slate-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap relative mt-[-1.00px]">
-                      OR SECURE WITH
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Social login buttons */}
-              <div className="flex items-start gap-4 relative self-stretch w-full">
-                {/* Google button */}
-                <button className="flex flex-1 items-center justify-center px-4 py-4 rounded-2xl border border-solid border-[#33415580] bg-transparent cursor-pointer hover:bg-[#ffffff08] transition-colors gap-2">
-                  <div className="relative w-4 h-4 bg-[url(/google.png)] bg-cover bg-[50%_50%]" />
-                  <span className="[font-family:'Plus_Jakarta_Sans',Helvetica] font-normal text-slate-400 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-                    Google
-                  </span>
-                </button>
-
-                {/* Apple button */}
-                <button className="flex flex-1 items-center justify-center px-4 py-[10px] rounded-2xl border border-solid border-[#33415580] bg-transparent cursor-pointer hover:bg-[#ffffff08] transition-colors gap-2">
-                  <AppleIcon
-                    className="w-[18px] h-[18px] text-slate-400"
-                    strokeWidth={1.5}
-                  />
-                  <span className="[font-family:'Plus_Jakarta_Sans',Helvetica] font-normal text-slate-400 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-                    Apple
-                  </span>
-                </button>
-              </div>
             </div>
           </div>
 
           {/* Sign up link */}
-          <div className="flex flex-col items-center relative self-stretch w-full">
+          <div className="flex w-full flex-col items-center">
             <p className="flex items-center justify-center h-5 [font-family:'Plus_Jakarta_Sans',Helvetica] font-normal text-sm text-center tracking-[0] leading-5 relative mt-[-1.00px]">
               {mode === "login" ? (
                 <>
@@ -259,8 +265,8 @@ export const Frame = (): JSX.Element => {
           </div>
 
           {/* Footer */}
-          <div className="flex flex-col items-center pt-4 pb-0 px-0 relative self-stretch w-full opacity-40">
-            <div className="inline-flex items-center relative gap-1">
+          <div className="flex w-full flex-col items-center px-0 pb-0 pt-4 opacity-40">
+            <div className="inline-flex items-center gap-1">
               <ShieldCheckIcon
                 className="w-2.5 h-2.5 text-slate-100"
                 strokeWidth={1.5}
@@ -269,8 +275,8 @@ export const Frame = (): JSX.Element => {
                 END-TO-END ENCRYPTED
               </span>
             </div>
-            <div className="max-w-[200px] pt-2 pb-0 px-0 inline-flex flex-col items-center relative">
-              <p className="w-[195.82px] [font-family:'Plus_Jakarta_Sans',Helvetica] font-normal text-slate-100 text-[10px] text-center tracking-[0] leading-[15px] relative mt-[-1.00px]">
+            <div className="inline-flex max-w-[220px] flex-col items-center px-0 pb-0 pt-2">
+              <p className="[font-family:'Plus_Jakarta_Sans',Helvetica] text-center text-[10px] font-normal leading-[15px] text-slate-100">
                 Preserving memories across time through
                 <br />
                 distributed vault technology.

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ThemeToggle } from '../theme/ThemeToggle';
@@ -12,14 +12,22 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const token = localStorage.getItem('token');
-  const [searchText, setSearchText] = React.useState("");
+  const avatar = localStorage.getItem('userAvatar') || "https://i.pravatar.cc/150?img=33";
+  const [searchText, setSearchText] = React.useState(searchParams.get("q") || "");
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+
+  React.useEffect(() => {
+    setSearchText(searchParams.get("q") || "");
+  }, [searchParams]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userAvatar');
     if (!localStorage.getItem('remember')) localStorage.removeItem('remember');
     setShowLogoutModal(false);
     navigate('/login');
@@ -109,7 +117,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => navigate('/profile')}
               className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#7919e6] cursor-pointer hover:shadow-[0_0_15px_#7919e6] transition-all"
             >
-              <img src="https://i.pravatar.cc/150?img=33" alt="User" className="w-full h-full object-cover" />
+              <img src={avatar} alt="User" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>

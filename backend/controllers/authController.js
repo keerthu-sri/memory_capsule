@@ -2,6 +2,35 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const fileToDataUri = (file) => {
+  if (!file?.buffer) return "";
+  const mimeType = file.mimetype || "application/octet-stream";
+  return `data:${mimeType};base64,${file.buffer.toString("base64")}`;
+};
+
+const normalizeList = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item).trim()).filter(Boolean);
+      }
+    } catch (error) {
+      // Fall back to comma-separated parsing.
+    }
+
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -26,7 +55,15 @@ exports.login = async (req, res) => {
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
-  res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+  res.json({
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || "",
+    },
+  });
 };
 
 exports.getMe = async (req, res) => {
@@ -40,7 +77,7 @@ exports.getMe = async (req, res) => {
 };
 
 exports.updateMe = async (req, res) => {
-  const { name, email } = req.body;
+  const { name, email, phone, age, gender, hobbies, interests } = req.body;
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -54,8 +91,30 @@ exports.updateMe = async (req, res) => {
       user.email = email;
     }
 
+    if (phone !== undefined) user.phone = String(phone).trim();
+    if (gender !== undefined) user.gender = String(gender).trim();
+    if (age !== undefined) {
+      const parsedAge = Number(age);
+      user.age = Number.isFinite(parsedAge) && parsedAge > 0 ? parsedAge : null;
+    }
+
+    if (hobbies !== undefined) user.hobbies = normalizeList(hobbies);
+    if (interests !== undefined) user.interests = normalizeList(interests);
+    if (req.file) user.avatar = fileToDataUri(req.file);
+
     await user.save();
-    res.json({ id: user._id, name: user.name, email: user.email, createdAt: user.createdAt });
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      age: user.age,
+      gender: user.gender || "",
+      avatar: user.avatar || "",
+      hobbies: user.hobbies || [],
+      interests: user.interests || [],
+      createdAt: user.createdAt,
+    });
   } catch (err) {
     res.status(500).json({ message: "Error updating profile" });
   }

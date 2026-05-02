@@ -1,6 +1,6 @@
 ﻿import { Clock, Mail, Plus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "../../components/layout/Layout";
 import { PageHeader } from "../../components/layout/PageHeader";
 import { MiniModal } from "../../components/ui/MiniModal";
@@ -29,6 +29,12 @@ const buildAssetUrl = (value?: string) => {
   return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
 };
 
+const getCapsulePreviewImage = (capsule: Capsule) => {
+  if (capsule.images?.[0]) return buildAssetUrl(capsule.images[0]);
+  const firstPhoto = capsule.memories?.find((memory) => memory.type === "photo" && memory.preview);
+  return firstPhoto?.preview ? buildAssetUrl(firstPhoto.preview) : "";
+};
+
 const getLastActivity = (createdAt?: string) => {
   if (!createdAt) return "recently";
   const diff = Date.now() - new Date(createdAt).getTime();
@@ -38,6 +44,10 @@ const getLastActivity = (createdAt?: string) => {
   const days = Math.floor(hours / 24);
   return `${days} day${days > 1 ? "s" : ""} ago`;
 };
+
+const isCapsuleUnlocked = (capsule: Capsule) =>
+  Boolean(capsule.isReadyToView || capsule.canViewContent || capsule.isUnlocked) ||
+  new Date() >= new Date(capsule.unlockDate);
 
 const VaultCard = ({
   capsule,
@@ -49,74 +59,90 @@ const VaultCard = ({
   onOpen: () => void;
   onInvite?: () => void;
   showInviteAction?: boolean;
-}) => (
-  <div
-    onClick={onOpen}
-    className="theme-surface group rounded-2xl overflow-hidden border backdrop-blur-md hover:border-[var(--app-accent)] transition-all cursor-pointer"
-  >
-    <div className="relative h-48 overflow-hidden">
-      {capsule.isReadyToView && capsule.images?.[0] ? (
-        <img
-          src={buildAssetUrl(capsule.images[0])}
-          alt={capsule.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-[#7919e6]/40 to-[#a855f7]/20 group-hover:scale-110 transition-transform duration-500" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-transparent to-transparent" />
+}) => {
+  const isUnlocked = isCapsuleUnlocked(capsule);
+  const previewImage = isUnlocked ? getCapsulePreviewImage(capsule) : "";
 
-      <div className="absolute top-4 right-4 bg-[#0a0a1a]/90 backdrop-blur-sm rounded-xl px-3 py-1.5 flex items-center gap-2 border border-[#7919e6]/30">
-        <Users className="w-4 h-4 text-[#7919e6]" />
-        <span className="text-xs font-medium">{(capsule.members?.length ?? 0) + 1} MEMBERS</span>
+  return (
+    <div
+      onClick={onOpen}
+      className="theme-surface group rounded-2xl overflow-hidden border backdrop-blur-md hover:border-[var(--app-accent)] transition-all cursor-pointer"
+    >
+      <div className="relative h-56 overflow-hidden bg-[#120f22]">
+        {previewImage ? (
+          <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_55%)] p-4">
+            <img
+              src={previewImage}
+              alt={capsule.title}
+              className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#7919e6]/40 to-[#a855f7]/20 group-hover:scale-110 transition-transform duration-500" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-transparent to-transparent" />
+
+        <div className="absolute top-4 right-4 bg-[#0a0a1a]/90 backdrop-blur-sm rounded-xl px-3 py-1.5 flex items-center gap-2 border border-[#7919e6]/30">
+          <Users className="w-4 h-4 text-[#7919e6]" />
+          <span className="text-xs font-medium">{(capsule.members?.length ?? 0) + 1} MEMBERS</span>
+        </div>
       </div>
-    </div>
 
-    <div className="p-6">
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <h3 className="font-semibold text-xl">{capsule.title}</h3>
-        {capsule.isLocked && (
-          <span className="text-[10px] uppercase tracking-widest text-[#d7b8ff] border border-[#7919e6]/40 rounded-full px-2 py-1">
-            Locked
-          </span>
+      <div className="p-6">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="font-semibold text-xl">{capsule.title}</h3>
+          {!isUnlocked && (
+            <span className="text-[10px] uppercase tracking-widest text-[#d7b8ff] border border-[#7919e6]/40 rounded-full px-2 py-1">
+              Locked
+            </span>
+          )}
+        </div>
+
+        <p className="theme-muted text-sm mb-4 line-clamp-2">{capsule.message || "Shared memory capsule"}</p>
+
+        <div className="space-y-2 text-sm theme-muted">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span>Last activity {getLastActivity(capsule.createdAt)}</span>
+          </div>
+          <div>Owner: {getOwnerName(capsule)}</div>
+          <div>{isUnlocked ? "Unlocked" : "Unlock"}: {new Date(capsule.unlockDate).toLocaleDateString()}</div>
+        </div>
+
+        {showInviteAction && (
+          <div className="mt-4 pt-4 border-t border-[#33415580] flex justify-end">
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                onInvite?.();
+              }}
+              className="text-xs px-3 py-1.5 border border-[#7919e6]/50 rounded-lg text-[#d7b8ff]"
+            >
+              Invite
+            </button>
+          </div>
         )}
       </div>
-
-      <p className="theme-muted text-sm mb-4 line-clamp-2">{capsule.message || "Shared memory capsule"}</p>
-
-      <div className="space-y-2 text-sm theme-muted">
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4" />
-          <span>Last activity {getLastActivity(capsule.createdAt)}</span>
-        </div>
-        <div>Owner: {getOwnerName(capsule)}</div>
-        <div>Unlock: {new Date(capsule.unlockDate).toLocaleDateString()}</div>
-      </div>
-
-      {showInviteAction && (
-        <div className="mt-4 pt-4 border-t border-[#33415580] flex justify-end">
-          <button
-            onClick={(event) => {
-              event.stopPropagation();
-              onInvite?.();
-            }}
-            className="text-xs px-3 py-1.5 border border-[#7919e6]/50 rounded-lg text-[#d7b8ff]"
-          >
-            Invite
-          </button>
-        </div>
-      )}
     </div>
-  </div>
-);
+  );
+};
 
 export const SharedSanctuary = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [capsules, setCapsules] = useState<Capsule[]>([]);
   const [invites, setInvites] = useState<InviteItem[]>([]);
   const userId = localStorage.getItem("userId") || "";
   const [inviteModal, setInviteModal] = useState<{ capsuleId: string; email: string; role: "viewer" | "editor" } | null>(null);
   const [notice, setNotice] = useState<{ message: string; variant: "info" | "success" | "error" } | null>(null);
+  const query = (searchParams.get("q") || "").trim().toLowerCase();
+
+  const matchesQuery = (capsule: Capsule) =>
+    !query ||
+    capsule.title?.toLowerCase().includes(query) ||
+    capsule.message?.toLowerCase().includes(query) ||
+    capsule.mood?.toLowerCase().includes(query) ||
+    getOwnerName(capsule).toLowerCase().includes(query);
 
   const showNotice = (message: string, variant: "info" | "success" | "error" = "info") => {
     setNotice({ message, variant });
@@ -151,8 +177,9 @@ export const SharedSanctuary = () => {
       capsules.filter(
         (capsule) =>
           !capsule.isPrivate && getUserIdValue(capsule.userId) === userId && capsule.currentUserRole === "owner"
+          && matchesQuery(capsule)
       ),
-    [capsules, userId]
+    [capsules, userId, query]
   );
 
   const sharedWithMe = useMemo(
@@ -161,9 +188,10 @@ export const SharedSanctuary = () => {
         (capsule) =>
           !capsule.isPrivate &&
           getUserIdValue(capsule.userId) !== userId &&
-          (capsule.currentUserRole === "viewer" || capsule.currentUserRole === "editor")
+          (capsule.currentUserRole === "viewer" || capsule.currentUserRole === "editor") &&
+          matchesQuery(capsule)
       ),
-    [capsules, userId]
+    [capsules, userId, query]
   );
 
   const handleInvite = async () => {
@@ -290,7 +318,7 @@ export const SharedSanctuary = () => {
               No collaborative capsules created by you yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sharedByMe.map((vault) => (
                 <VaultCard
                   key={vault._id}
@@ -318,7 +346,7 @@ export const SharedSanctuary = () => {
               No accepted shared capsules yet.
             </div>
           ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sharedWithMe.map((vault) => (
                 <VaultCard key={vault._id} capsule={vault} onOpen={() => navigate(`/capsule/${vault._id}`)} />
               ))}
@@ -370,4 +398,3 @@ export const SharedSanctuary = () => {
     </Layout>
   );
 };
-

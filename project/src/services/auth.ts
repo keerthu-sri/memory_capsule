@@ -6,6 +6,20 @@ type AuthData = {
   password?: string;
 };
 
+export type ProfileData = {
+  id?: string;
+  _id?: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  phone?: string;
+  age?: number | null;
+  gender?: string;
+  avatar?: string;
+  hobbies?: string[];
+  interests?: string[];
+};
+
 export const register = (data: AuthData) => API.post("/auth/register", data);
 
 export const login = async (data: AuthData) => {
@@ -17,11 +31,16 @@ export const login = async (data: AuthData) => {
   localStorage.setItem("token", token);
   localStorage.setItem("userId", storedUserId);
   localStorage.setItem("userEmail", user.email);
+  localStorage.setItem("userName", user.name || "");
+  localStorage.setItem("userAvatar", user.avatar || "");
 
   return res;
 };
 
 export const getProfile = () => API.get("/auth/me");
 
-export const updateProfile = (data: { name?: string; email?: string }) => API.put("/auth/me", data);
+export const updateProfile = (data: FormData | { name?: string; email?: string }) =>
+  API.put("/auth/me", data, data instanceof FormData ? {
+    headers: { "Content-Type": "multipart/form-data" },
+  } : undefined);
 
