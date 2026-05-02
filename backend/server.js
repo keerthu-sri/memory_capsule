@@ -5,61 +5,92 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ Middleware (VERY IMPORTANT)
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "https://memory-capsule-murex.vercel.app/"];
+/* =========================
+   ✅ CORS CONFIG (UPDATED)
+========================= */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://memory-capsule-murex.vercel.app"
+];
+
 app.use(
   cors({
-    origin(origin, callback) {
-      // Allow non-browser tools (no origin) and configured frontend origins.
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
-        return;
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-      callback(new Error("Not allowed by CORS"));
     },
+    credentials: true
   })
 );
+
 app.use(express.json());
 
-// ✅ Cron Job
+/* =========================
+   ✅ STATIC FILES
+========================= */
+app.use("/uploads", express.static("uploads"));
+
+/* =========================
+   ✅ CRON JOB
+========================= */
 require("./cron");
 
-// ✅ Routes
+/* =========================
+   ✅ ROUTES
+========================= */
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/capsules", require("./routes/capsuleRoutes"));
 app.use("/api/memories", require("./routes/memoryRoutes"));
 app.use("/api/members", require("./routes/memberRoutes"));
-app.use("/members", require("./routes/memberRoutes"));
-app.use("/uploads", express.static("uploads"));
 
-// ✅ MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/memory_capsule")
-  .then(() => console.log("✅ MongoDB Connected"))
+/* =========================
+   ✅ MONGODB (FIXED)
+========================= */
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Atlas Connected"))
   .catch((err) => console.error("❌ DB Error:", err.message));
 
-// ✅ Test route
+/* =========================
+   ✅ TEST ROUTE
+========================= */
 app.get("/", (req, res) => {
-  res.send("Server + DB working");
+  res.send("🚀 Server is running");
 });
 
-// ✅ Start server
+/* =========================
+   ✅ SOCKET.IO
+========================= */
 const http = require("http");
 const { Server } = require("socket.io");
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: "*"
+  }
 });
 
 app.set("io", io);
 
 io.on("connection", (socket) => {
+  console.log("⚡ User connected:", socket.id);
+
   socket.on("joinCapsule", (capsuleId) => {
     socket.join(capsuleId);
   });
 });
 
-server.listen(5000, () => {
-  console.log("🚀 Server running on port 5000");
+/* =========================
+   ✅ PORT (IMPORTANT FIX)
+========================= */
+const PORT = process.env.PORT || 5000;
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
