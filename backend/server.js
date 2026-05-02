@@ -6,7 +6,7 @@ require("dotenv").config();
 const app = express();
 
 // ✅ Middleware (VERY IMPORTANT)
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "https://memory-capsule-murex.vercel.app/"];
 app.use(
   cors({
     origin(origin, callback) {

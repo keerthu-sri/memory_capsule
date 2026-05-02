@@ -29,7 +29,7 @@ import {
 const buildAssetUrl = (value?: string) => {
   if (!value) return "";
   if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
-  return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
+  return `${import.meta.env.VITE_API_URL}/${value.replace(/\\/g, "/")}`;
 };
 
 const getUserLabel = (value?: string | { _id?: string; id?: string; name?: string; email?: string }) => {
@@ -102,7 +102,7 @@ export const CapsuleView = () => {
   useEffect(() => {
     if (!id) return;
 
-    socketRef.current = io("http://localhost:5000");
+    socketRef.current = io(`${import.meta.env.VITE_API_URL}`);
     socketRef.current.emit("joinCapsule", id);
     socketRef.current.on("capsuleUpdated", (payload: { capsuleId?: string }) => {
       if (payload?.capsuleId === id) {

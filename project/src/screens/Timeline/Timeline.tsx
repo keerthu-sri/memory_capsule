@@ -9,7 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 const buildAssetUrl = (value?: string) => {
   if (!value) return "";
   if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
-  return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
+  return `${import.meta.env.VITE_API_URL}/${value.replace(/\\/g, "/")}`;
 };
 
 export const Timeline = () => {
@@ -107,7 +107,7 @@ export const Timeline = () => {
                     : "bg-transparent text-slate-400 hover:text-white"
                 )}
               >
-                • {time}
+                ï¿½ {time}
               </button>
             ))}
           </div>

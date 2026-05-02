@@ -26,7 +26,7 @@ const getOwnerName = (capsule: Capsule) =>
 const buildAssetUrl = (value?: string) => {
   if (!value) return "";
   if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) return value;
-  return `http://localhost:5000/${value.replace(/\\/g, "/")}`;
+  return `${import.meta.env.VITE_API_URL}/${value.replace(/\\/g, "/")}`;
 };
 
 const getCapsulePreviewImage = (capsule: Capsule) => {

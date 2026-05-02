@@ -20,7 +20,7 @@ export type Member = {
 export const getMemberImageUrl = (path?: string) => {
   if (!path) return "";
   if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) return path;
-  return `http://localhost:5000/${path.replace(/\\/g, "/")}`;
+  return `${import.meta.env.VITE_API_URL}/${path.replace(/\\/g, "/")}`;
 };
 
 export const createMember = (data: FormData) =>
