@@ -75,7 +75,10 @@ Initial load may be slow due to free-tier hosting
 📊 Analytics dashboard
 🔔 Push notifications
 
-Author
+Authors
 
 Keerthana SRI D
+Sanjana C
+Buhary Fawaaz S F
+
 Built as a full-stack project showcasing real-world deployment and system design.
