@@ -1,84 +1,248 @@
-Memory Capsule
+# memory_capsule
 
-A full-stack web application that allows users to create digital "memory capsules" — store photos, messages, and moments that unlock at a future date.
+Memory Capsule – Fullstack Application
 
-Live Demo:
-🌐 Frontend (Vercel): https://memory-capsule-murex.vercel.app
-⚙️ Backend (Render): https://memory-capsule-zk9c.onrender.com
+Project Overview
 
-Features:
-🔐 Secure authentication (JWT-based)
-📦 Create personal memory capsules
-⏳ Time-based unlocking of memories
-👥 Add and manage team members
-🖼 Upload images and media
-🔔 Real-time updates (Socket.IO)
-📅 Timeline & calendar views
-🌐 Fully deployed (Frontend + Backend + Cloud DB)
+Memory Capsule is a fullstack web application that allows users to create, manage, and share digital memory capsules. It also includes a Team Members module for managing project team details with full CRUD functionality.
+
+---
+
+Features
+
+Authentication
+
+- User Signup & Login
+- JWT-based authentication
+- Secure password hashing (bcrypt)
+
+Capsule Management
+
+- Create, view, update, delete capsules
+- Upload media (images/videos)
+- Dashboard with capsule stats
+
+Sharing & Collaboration
+
+- Share capsules with other users
+- “Shared by me” and “Shared with me”
+- Invite system (pending/accepted)
+
+Team Members Module
+
+- Add team members with full details
+- Upload profile picture
+- View all members (card layout)
+- View detailed member information
+- Update and delete members
+
+---
 
 Tech Stack
-Frontend
-React (Vite + TypeScript)
-Tailwind CSS
-Axios
-React Router
-Backend
-Node.js
-Express.js
-MongoDB (Atlas)
-Mongoose
-Multer (file uploads)
-Socket.IO
-Deployment
-Frontend → Vercel
-Backend → Render
-Database → MongoDB Atlas
 
-📁 Project Structure
-memory-capsule/
+Frontend
+
+- React (Vite)
+- Tailwind CSS
+- Axios
+
+Backend
+
+- Node.js
+- Express.js
+- MongoDB (Mongoose)
+
+Other Tools
+
+- JWT Authentication
+- Multer (file uploads)
+
+---
+
+Project Structure
+
+FSD_PROJ/
+├── backend/
+│   ├── models/
+│   ├── routes/
+│   ├── controllers/
+│   ├── uploads/
+│   └── server.js
 │
-├── frontend/        # React app
-├── backend/         # Node + Express API
-├── uploads/         # Uploaded files (local)
+├── memory_capsule/ (frontend)
+│   ├── src/
+│   ├── components/
+│   ├── pages/
+│   └── App.jsx
+│
+├── .gitignore
 └── README.md
 
-⚙️ Environment Variables
-🔧 Backend (.env)
-PORT=5000
-MONGO_URI=your_mongodb_atlas_uri
-JWT_SECRET=your_secret_key
+---
 
+Installation & Setup
 
-🌐 Frontend (.env)
-VITE_API_URL=https://memory-capsule-zk9c.onrender.com
+🔹 1. Clone the Repository
 
-🛠 Installation & Setup
-1️⃣ Clone the repository
 git clone https://github.com/keerthu-sri/memory_capsule.git
-cd memory_capsule
-2️⃣ Backend Setup
+
+cd fsd_proj
+
+---
+
+🔹 2. Install Backend Dependencies
+
 cd backend
 npm install
+
+---
+
+🔹 3. Install Frontend Dependencies
+
+cd ../memory_capsule
+npm install
+
+---
+
+🔹 4. Setup Environment Variables
+
+Create a ".env" file inside backend:
+
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+
+---
+
+▶️ Running the Application
+
+🔹 Start Backend Server
+
+cd backend
+npm start
+
+or (if using nodemon):
+
 npm run dev
-3️⃣ Frontend Setup
-cd frontend
+
+---
+
+🔹 Start Frontend
+
+cd memory_capsule
+npm run dev
+
+---
+
+🌐 Access Application
+
+Frontend: http://localhost:5173
+Backend:  http://localhost:5000
+
+---
+
+API Endpoints
+
+Authentication
+
+POST   /api/auth/register
+POST   /api/auth/login
+
+---
+
+Capsules
+
+GET    /api/capsules
+POST   /api/capsules
+PUT    /api/capsules/:id
+DELETE /api/capsules/:id
+
+---
+
+Sharing
+
+POST   /api/share
+GET    /api/shared-by-me
+GET    /api/shared-with-me
+
+---
+
+Team Members
+
+POST   /api/members
+GET    /api/members
+GET    /api/members/:id
+PUT    /api/members/:id
+DELETE /api/members/:id
+
+---
+
+File Upload
+
+- Images are uploaded using Multer
+- Stored in "/backend/uploads"
+- File path saved in MongoDB
+
+---
+
+Testing APIs
+
+Use:
+
+- Postman
+- Thunder Client (VS Code)
+
+---
+
+Future Enhancements
+
+- Notifications system
+- Real-time updates
+- Deployment (Vercel + Render)
+- Role-based access control
+
+---
+
+How to Run (Quick Steps)
+
+git clone <repo-link>
+cd fsd_proj
+
+# Backend
+cd backend
+npm install
+npm start
+
+# Frontend
+cd ../memory_capsule
 npm install
 npm run dev
-📦 API Base URL
-https://memory-capsule-zk9c.onrender.com/api
 
-Initial load may be slow due to free-tier hosting
-🔮 Future Improvements
-☁️ Cloud storage integration (Cloudinary / AWS S3)
-🔐 OAuth login (Google)
-📱 Mobile responsiveness improvements
-📊 Analytics dashboard
-🔔 Push notifications
+---
 
-Authors
+Notes
 
-Keerthana SRI D
+- Ensure MongoDB is running
+- Use correct ".env" values
+- Do not upload "node_modules"
+
+---
+
+Conclusion
+
+This project demonstrates:
+
+- Fullstack development
+- REST API integration
+- Authentication & authorization
+- File upload handling
+- Real-world collaboration features
+
+---
+
+Author
+
+Keerthana Sri D
 Sanjana C
 Buhary Fawaaz S F
-
-Built as a full-stack project showcasing real-world deployment and system design.
+FULL STACK DEVELOPMENT PROJECT
